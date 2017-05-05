@@ -1,2 +1,2 @@
 # WordCrusher
-A mobile game created using Corona Lab. 
+A mobile game based on Corona Lab. 
