@@ -7,8 +7,8 @@
 -- imports
 local mymodule = require "MainMenu";
 local physics = require("physics");
-local json = require("json");
-local math = require("math");
+local widget = require("widget");
+
 physics.start()
 physics.setGravity(0,0)
 
@@ -21,7 +21,7 @@ screen_height = display.contentHeight;
 -- Create the Main Menu
 menu = MainMenu:new(nil)
 menu:start(screen_width/2,100);
- 
+
 -- text list
 local answer_textList = {}
 
@@ -51,21 +51,96 @@ local failed_text = nil
 -- text list for failed tries
 local failed_attempts = {}
 
+local question_text = nil;
+
+local failed_timer_time = 10000
+
+local answers = nil
+
+-- Function to handle button events
+local function handleButtonEvent( event )
+  if( event.phase == "began") then
+    menu:remove()
+    startGame(1)
+  end
+end
+
+-- Create Start Button
+local start_button = widget.newButton(
+    {
+        id = "start_button",
+        label = "Start Game",
+        onEvent = handleButtonEvent,
+        shape = "roundedRect",
+        width = 200,
+        height = 40,
+        cornerRadius = 2,
+        fillColor = { default={1,0,0,1}, over={1,0.1,0.7,0.4} },
+        strokeColor = { default={1,0.4,0,1}, over={0.8,0.8,1,1} },
+        strokeWidth = 4
+    }
+)
+
+start_button.x = screen_width/2;
+start_button.y = screen_height-120;
+
+local restart_button = nil;
+local failed_text = nil;
 
 -- timer for failed level
 function levelFailed()
   failed_text = display.newText("Failed Level", screen_width/2, screen_height/2)
+
+  -- Function to handle button events
+  local function restartButtonEvent( event )
+    if( event.phase == "began") then
+      startGame(2)
+    end
+  end
+
+  -- Create Start Button
+  restart_button = widget.newButton(
+      {
+          id = "restart_button",
+          label = "Try Again?",
+          onEvent = restartButtonEvent,
+          shape = "roundedRect",
+          width = 200,
+          height = 40,
+          cornerRadius = 2,
+          fillColor = { default={1,0,0,1}, over={1,0.1,0.7,0.4} },
+          strokeColor = { default={1,0.4,0,1}, over={0.8,0.8,1,1} },
+          strokeWidth = 4
+      }
+  )
+
+  restart_button.x = screen_width/2;
+  restart_button.y = screen_height-100;
 end
 
-
 -- Function to start game
-function startGame()
-  level_string = "Level " .. tostring(level)
+function startGame(type_button)
+  if(type_button == 1) then
+    display.remove(start_button);
+  else
+    display.remove(restart_button);
+    display.remove(failed_text);
+    display.remove(level_text);
+    display.remove(question_text);
+    failed_timer_time = 10000;
+    level = 1;
+    x_velocity = -100;
+    for i=0,table.getn(failed_attempts) do
+      failed_attempts[i].isVisible = false;
+    end
+  end
+
+  level_string = "Level " .. tostring(level);
   level_text = display.newText(level_string,screen_width/2,30);
 
   -- Question Text
   question = "What day is it?";
-  display.newText(question,screen_width/2,60);
+  question_text = display.newText(question,screen_width/2,60);
 
   -- Wrong Answer
   times_wrong = 0;
@@ -83,48 +158,6 @@ function startGame()
   end
 
   startTimer()
-end
-
--- Returns a question
-function getQuestion()
-	local path = system.pathForFile("levels.json")
-	local contents = ""
-	local myTable = {}
-	local file = io.open( path, "r" )
-	if file then
-		local contents = file:read("*a")
-		myTable = json.decode(contents);
-		io.close( file )
-		tableSize = 0
-		for k, v in pairs( myTable ) do
-			tableSize = tableSize + 1
-		end
-		randNumber = math.random(tableSize)
-		counter = 1
-		returnTable = {}
-		for k, v in pairs (myTable) do
-			if counter == randNumber then
-			  table.insert(returnTable, k)
-			  table.insert(returnTable, v)
-			  print(k)
-			  print(v)
-			  return returnTable
-			else
-			  counter = counter + 1
-			end
-		end
-		return nil
-	end
-end
-
--- onclicklister for background
-function clickBackground(event)
-  if( event.phase == "began") then
-    background:removeEventListener("touch", clickBackground)
-    menu:remove()
-    startGame()
-  end
-  return true
 end
 
 -- timer for level to start
@@ -149,6 +182,7 @@ function loadAnswers()
 
   -- answer list
   answers = {"example", "here", "me", "wednesday", "white", "420"}
+  randAnswerList()
 
   -- set real answer
   real_answer = "wednesday"
@@ -172,7 +206,7 @@ function loadAnswers()
   end
 
   -- timer to end level if user misses the words
-  failed_timer = timer.performWithDelay(10000, levelFailed)
+  failed_timer = timer.performWithDelay(failed_timer_time, levelFailed)
 end
 
 
@@ -201,6 +235,7 @@ end
 -- Function to go to next level
 function nextLevel()
   timer.cancel(failed_timer)
+  failed_timer_time = failed_timer_time - 50;
 
   for i=1, table.getn(answer_textList) do
     display.remove(answer_textList[1])
@@ -230,11 +265,23 @@ function displayFails()
       display.remove(answer_textList[1])
       table.remove(answer_textList, 1)
     end
+    timer.cancel(failed_timer)
     levelFailed()
   end
 end
 
+function randAnswerList()
+  length = table.getn(answers) - 1;
+  random_list = {}
+  print("Going in Bro")
+  for i=0,length do
+    index = math.random(1,table.getn(answers))
+    print(answers[index])
+    table.insert(random_list, answers[index])
+    table.remove(answers,index)
+  end
+  answers = random_list;
+end
+
 -- make restart Game Button
 -- make start Game Button
-
-background:addEventListener("touch", clickBackground)
