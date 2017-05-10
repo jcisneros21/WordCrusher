@@ -177,6 +177,9 @@ function loadAnswers()
   random_x = {screen_width + 40, screen_width + 100, screen_width + 160}
   random_y = {screen_height/2 - 40, screen_height/2 + 20, screen_height/2 + 80}
 
+
+  -- trivia_table = getQuestion()
+
   -- answer list
   answers = {"example", "here", "me", "wednesday", "white", "420"}
   randAnswerList()
