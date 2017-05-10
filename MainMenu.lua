@@ -18,13 +18,10 @@ end
 function MainMenu:start(x,y)
   self.title = display.newText("WordCrusher",x,y);
   self.title.size = 60;
-  self.click = display.newText("Click the screen to Start the Game!",x,y+100);
-  self.click.size = 20;
 end
 
 -- Remove the Main menu
 
 function MainMenu:remove()
   display.remove(self.title);
-  display.remove(self.click);
 end
