@@ -8,6 +8,8 @@
 local mymodule = require "MainMenu";
 local physics = require("physics");
 local widget = require("widget");
+local math = require("math");
+local json = require("json");
 
 physics.start()
 physics.setGravity(0,0)
@@ -118,6 +120,36 @@ function levelFailed()
   restart_button.y = screen_height-100;
 end
 
+-- Returns a question
+function getQuestion()
+	local path = system.pathForFile("levels.json")
+	local contents = ""
+	local myTable = {}
+	local file = io.open( path, "r" )
+	if file then
+		local contents = file:read("*a")
+		myTable = json.decode(contents);
+		io.close( file )
+		tableSize = 0
+		for k, v in pairs( myTable ) do
+			tableSize = tableSize + 1
+		end
+		randNumber = math.random(tableSize)
+		counter = 1
+		returnTable = {}
+		for k, v in pairs (myTable) do
+			if counter == randNumber then
+			  table.insert(returnTable, k)
+			  table.insert(returnTable, v)
+			  return returnTable
+			else
+			  counter = counter + 1
+			end
+		end
+		return nil
+	end
+end
+
 -- Function to start game
 function startGame(type_button)
   if(type_button == 1) then
@@ -137,10 +169,6 @@ function startGame(type_button)
 
   level_string = "Level " .. tostring(level);
   level_text = display.newText(level_string,screen_width/2,30);
-
-  -- Question Text
-  question = "What day is it?";
-  question_text = display.newText(question,screen_width/2,60);
 
   -- Wrong Answer
   times_wrong = 0;
@@ -173,19 +201,21 @@ end
 
 -- Load Answers for Game
 function loadAnswers()
+
+  trivia_table = getQuestion()
+  question = trivia_table[1]
+  answers = trivia_table[2]
+
+  -- Question Text
+  question_text = display.newText(question,screen_width/2,60);
+
   -- starting coordinates for answers
   random_x = {screen_width + 40, screen_width + 100, screen_width + 160}
   random_y = {screen_height/2 - 40, screen_height/2 + 20, screen_height/2 + 80}
 
-
-  -- trivia_table = getQuestion()
-
   -- answer list
-  answers = {"example", "here", "me", "wednesday", "white", "420"}
+  real_answer = answers[1]
   randAnswerList()
-
-  -- set real answer
-  real_answer = "wednesday"
 
   times = 0;
   for i=1,table.getn(answers) do
@@ -234,6 +264,7 @@ end
 
 -- Function to go to next level
 function nextLevel()
+  display.remove(question_text)
   timer.cancel(failed_timer)
   failed_timer_time = failed_timer_time - 50;
 
