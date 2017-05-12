@@ -44,7 +44,7 @@ local x_velocity = -100
 local time_text = nil
 
 -- start time for countdown timer
-local startTime = 5
+local startTime = 3
 
 -- failed timer
 local failed_timer = nil
@@ -190,6 +190,7 @@ end
 
 -- timer for level to start
 function countdown(event)
+  print(startTime)
   startTime = startTime - 1
   if(startTime == 0) then
     display.remove(time_text)
@@ -266,7 +267,7 @@ end
 function nextLevel()
   display.remove(question_text)
   timer.cancel(failed_timer)
-  failed_timer_time = failed_timer_time - 50;
+  failed_timer_time = failed_timer_time - 150;
 
   for i=1, table.getn(answer_textList) do
     display.remove(answer_textList[1])
@@ -281,7 +282,7 @@ function nextLevel()
 end
 
 function startTimer()
-  startTime = 5
+  startTime = 3
   time_text = display.newText(tostring(startTime), screen_width/2, screen_height/2)
   timer.performWithDelay(1000, countdown, startTime)
 end
