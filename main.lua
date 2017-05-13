@@ -56,6 +56,7 @@ local failed_attempts = {}
 local question_text = nil;
 
 local failed_timer_time = 10000
+local extra_time = 0
 
 local answers = nil
 
@@ -95,7 +96,7 @@ local failed_text = nil;
 -- timer for failed level
 function levelFailed()
   failed_text = display.newText("Failed Level", screen_width/2, screen_height/2)
-  
+
   -- update high score
   if (level > high_score) then
 	high_score = level
@@ -130,7 +131,7 @@ end
 
 -- Returns a question
 function getQuestion()
-	local path = system.pathForFile("levels.json")
+	local path = system.pathForFile("Questions.json")
 	local contents = ""
 	local myTable = {}
 	local file = io.open( path, "r" )
@@ -168,7 +169,7 @@ function startGame(type_button)
     display.remove(level_text);
 	display.remove(level_high_score)
     display.remove(question_text);
-    failed_timer_time = 10000;
+    failed_timer_time = 12000;
     level = 1;
     x_velocity = -100;
     for i=0,table.getn(failed_attempts) do
@@ -237,7 +238,7 @@ function loadAnswers()
     y_coordinate = random_y[(i % 3) + 1];
     x_coordinate = random_x[math.random(1,3)];
 
-    answer_textList[i] = display.newText(answers[i],x_coordinate + (times*140), y_coordinate);
+    answer_textList[i] = display.newText(answers[i],x_coordinate + (times*240), y_coordinate);
     answer_textList[i].id = answers[i];
     physics.addBody(answer_textList[i], "dynamic")
     answer_textList[i]:setLinearVelocity(x_velocity)
@@ -277,7 +278,8 @@ end
 function nextLevel()
   display.remove(question_text)
   timer.cancel(failed_timer)
-  failed_timer_time = failed_timer_time - 150;
+  extra_time = extra_time + 70
+  failed_timer_time = failed_timer_time - 180 - extra_time;
 
   for i=1, table.getn(answer_textList) do
     display.remove(answer_textList[1])
