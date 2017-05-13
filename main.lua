@@ -59,6 +59,9 @@ local failed_timer_time = 10000
 
 local answers = nil
 
+-- high score
+local high_score = 0
+
 -- Function to handle button events
 local function handleButtonEvent( event )
   if( event.phase == "began") then
@@ -92,6 +95,11 @@ local failed_text = nil;
 -- timer for failed level
 function levelFailed()
   failed_text = display.newText("Failed Level", screen_width/2, screen_height/2)
+  
+  -- update high score
+  if (level > high_score) then
+	high_score = level
+  end
 
   -- Function to handle button events
   local function restartButtonEvent( event )
@@ -158,6 +166,7 @@ function startGame(type_button)
     display.remove(restart_button);
     display.remove(failed_text);
     display.remove(level_text);
+	display.remove(level_high_score)
     display.remove(question_text);
     failed_timer_time = 10000;
     level = 1;
@@ -169,6 +178,7 @@ function startGame(type_button)
 
   level_string = "Level " .. tostring(level);
   level_text = display.newText(level_string,screen_width/2,30);
+  level_high_score = display.newText("H.S: " .. high_score,screen_width,30);
 
   -- Wrong Answer
   times_wrong = 0;
